@@ -1,0 +1,22 @@
+# Fictional payments API — public sample only.
+# Replace prometheus_uid with a UID from YOUR Grafana.
+
+microservice:
+  name: payments-api
+  cluster: checkout
+  service_name: payments-api
+
+dashboard:
+  uid: payapi001
+  title: payments-api
+
+datasources:
+  prometheus_uid: prom-local
+
+alerts:
+  enabled: true
+  team: checkout-sre
+
+monitoring:
+  consumer:
+    group: payments-api-consumer

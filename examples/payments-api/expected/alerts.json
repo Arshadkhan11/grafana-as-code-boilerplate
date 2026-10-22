@@ -1,0 +1,67 @@
+{
+  "groups": [
+    {
+      "name": "payments-api-slo",
+      "interval": "1m",
+      "rules": [
+        {
+          "title": "payments-api high error rate",
+          "condition": "A",
+          "data": [
+            {
+              "refId": "A",
+              "relativeTimeRange": {
+                "from": 300,
+                "to": 0
+              },
+              "datasourceUid": "prom-local",
+              "model": {
+                "expr": "sum(rate(http_requests_total{service=\"payments-api\",code=~\"5..\"}[5m])) / sum(rate(http_requests_total{service=\"payments-api\"}[5m])) > 0.02"
+              }
+            }
+          ],
+          "noDataState": "OK",
+          "execErrState": "Error",
+          "for": "5m",
+          "annotations": {
+            "summary": "payments-api 5xx ratio > 2% for 5m",
+            "runbook_url": "https://example.invalid/runbooks/payments-api"
+          },
+          "labels": {
+            "severity": "page",
+            "team": "checkout-sre",
+            "service": "payments-api"
+          }
+        },
+        {
+          "title": "payments-api p99 latency",
+          "condition": "A",
+          "data": [
+            {
+              "refId": "A",
+              "relativeTimeRange": {
+                "from": 300,
+                "to": 0
+              },
+              "datasourceUid": "prom-local",
+              "model": {
+                "expr": "histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{service=\"payments-api\"}[5m])) by (le)) > 0.5"
+              }
+            }
+          ],
+          "noDataState": "OK",
+          "execErrState": "Error",
+          "for": "10m",
+          "annotations": {
+            "summary": "payments-api p99 > 500ms for 10m"
+          },
+          "labels": {
+            "severity": "ticket",
+            "team": "checkout-sre",
+            "service": "payments-api"
+          }
+        }
+      ]
+    }
+  ]
+}

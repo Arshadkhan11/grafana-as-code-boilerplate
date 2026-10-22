@@ -1,0 +1,61 @@
+{
+  "groups": [
+    {
+      "name": "{{microservice.name}}-slo",
+      "interval": "1m",
+      "rules": [
+        {
+          "title": "{{microservice.name}} high error rate",
+          "condition": "A",
+          "data": [
+            {
+              "refId": "A",
+              "relativeTimeRange": {"from": 300, "to": 0},
+              "datasourceUid": "{{datasources.prometheus_uid}}",
+              "model": {
+                "expr": "sum(rate(http_requests_total{service=\"{{microservice.service_name}}\",code=~\"5..\"}[5m])) / sum(rate(http_requests_total{service=\"{{microservice.service_name}}\"}[5m])) > 0.02"
+              }
+            }
+          ],
+          "noDataState": "OK",
+          "execErrState": "Error",
+          "for": "5m",
+          "annotations": {
+            "summary": "{{microservice.name}} 5xx ratio > 2% for 5m",
+            "runbook_url": "https://example.invalid/runbooks/{{microservice.name}}"
+          },
+          "labels": {
+            "severity": "page",
+            "team": "{{alerts.team}}",
+            "service": "{{microservice.service_name}}"
+          }
+        },
+        {
+          "title": "{{microservice.name}} p99 latency",
+          "condition": "A",
+          "data": [
+            {
+              "refId": "A",
+              "relativeTimeRange": {"from": 300, "to": 0},
+              "datasourceUid": "{{datasources.prometheus_uid}}",
+              "model": {
+                "expr": "histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{service=\"{{microservice.service_name}}\"}[5m])) by (le)) > 0.5"
+              }
+            }
+          ],
+          "noDataState": "OK",
+          "execErrState": "Error",
+          "for": "10m",
+          "annotations": {
+            "summary": "{{microservice.name}} p99 > 500ms for 10m"
+          },
+          "labels": {
+            "severity": "ticket",
+            "team": "{{alerts.team}}",
+            "service": "{{microservice.service_name}}"
+          }
+        }
+      ]
+    }
+  ]
+}
